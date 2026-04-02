@@ -3,9 +3,9 @@ from bs4 import BeautifulSoup
 from datetime import datetime, timedelta, timezone
 
 # --- CONFIGURATION ---
-TOKEN = "8745585993:AAE2zRpimM9_VW9YK0I7FhDmvHb7iy1tw9A"
+TOKEN = "8236985453:AAHKOSEMhu4ATV0MwN4B-VaAmK9wmuWbJwo"
 CHAT_ID = "1115358053"
-API_KEY = "1c52b530-7d6e-4a64-b061-85cc76e6e937"
+API_KEY = "45b4f3e2-b8db-473c-8b38-374fa0b0febe"
 
 def get_trichy_material_prices():
     # URL targeting Construction Materials in Trichy

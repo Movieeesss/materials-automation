@@ -1,21 +1,27 @@
 from flask import Flask
 import threading
 import os
-import movies # Unga movies.py file-ah import pannuthu
+import movies
+import materials # Import the new file
 
 app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Movie Tracker is Live!", 200
+    return "Multi-Tracker is Live!", 200
 
 @app.route('/run-movies')
 def trigger_movies():
-    # Background Thread: Ithu thaan cron-job timeout aagaama thadukkum
-    # Hit panna udane 'OK' response anuppidum, scraper background-la run aagum
     thread = threading.Thread(target=movies.run_all)
     thread.start()
-    return "Scraper Started in Background", 200
+    return "Movie Scraper Started", 200
+
+@app.route('/run-materials')
+def trigger_materials():
+    # Background Thread for IndiaMART
+    thread = threading.Thread(target=materials.run_materials)
+    thread.start()
+    return "Material Scraper Started", 200
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))

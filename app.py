@@ -10,12 +10,12 @@ def home():
 
 @app.route('/run-materials')
 def trigger_materials():
-    # Threading moolama background-la scraper odum
+    # Background-la scraper odum, so response udane anuppalam
     thread = threading.Thread(target=run_materials_broadcast)
     thread.start()
     
-    # CRITICAL FIX: Cron-job error thavirkka chinna response
-    return "Scraper Started", 200 
+    # CRITICAL: Cron-job error thavirkka chinna response
+    return "Success", 200 
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)

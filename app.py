@@ -1,21 +1,17 @@
-import os
-from flask import Flask
+from flask import Flask, request
 import threading
-import materials # Materials file mattum import pandrom
+from materials import run_materials_broadcast # Import the new function
 
 app = Flask(__name__)
 
-@app.route('/')
-def home():
-    return "Materials Tracker is Live!", 200
-
-@app.route('/run-materials')
+@app.route('/run-materials', methods=['GET'])
 def trigger_materials():
-    # Background-la scraper run aagum
-    thread = threading.Thread(target=materials.run_materials)
+    # Run in background to avoid Render timeout
+    thread = threading.Thread(target=run_materials_broadcast)
     thread.start()
-    return "Material Scraper Started in Background", 200
+    return "OK", 200 # Instant response to Cron-job
+
+# ... (Unga existing /webhook and /run-movies routes) ...
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=5000)

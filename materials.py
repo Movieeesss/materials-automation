@@ -5,7 +5,7 @@ from datetime import datetime, timedelta, timezone
 # --- CONFIGURATION ---
 TOKEN = "8236985453:AAHKOSEMhu4ATV0MwN4B-VaAmK9wmuWbJwo"
 CHAT_ID = "1115358053" 
-API_KEY = "45b4f3e2-b8db-473c-8b38-374fa0b0febe"
+API_KEY = "5a50f090-2bd7-442f-b0c6-3888ee7620c5"
 
 def get_buildiyo_steel_prices():
     target_url = "https://buildiyo.store/pages/today-steel-price"

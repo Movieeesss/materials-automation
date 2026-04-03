@@ -7,64 +7,70 @@ TOKEN = "8236985453:AAHKOSEMhu4ATV0MwN4B-VaAmK9wmuWbJwo"
 CHAT_ID = "1115358053" 
 API_KEY = "5a50f090-2bd7-442f-b0c6-3888ee7620c5"
 
-def get_indiamart_trichy_per_kg():
-    # Specific URL for Trichy Steel Dealers
-    target_url = "https://dir.indiamart.com/tiruchirappalli/tmt-steel-bars.html"
+def get_ars_per_kg():
+    # Official ARS Price Page
+    target_url = "https://arsgroup.in/tmt-steel-price-today"
     
-    # 25 credits per run - Using residential proxy for high success rate
-    proxy_url = (
-        f"https://api.webscraping.ai/html?api_key={API_KEY}"
-        f"&url={target_url}&proxy=residential&render=true&wait=10000"
-    )
+    # Using JS Render to ensure the price calculator loads fully
+    proxy_url = f"https://api.webscraping.ai/html?api_key={API_KEY}&url={target_url}&render=true&wait=5000"
     
-    kg_data = []
+    kg_results = []
     try:
-        response = requests.get(proxy_url, timeout=45)
+        response = requests.get(proxy_url, timeout=35)
         if response.status_code == 200:
-            soup = BeautifulSoup(response.text, 'lxml')
-            items = soup.select('.m_cpn') or soup.select('li.lst_cl')
+            soup = BeautifulSoup(response.text, 'html.parser')
             
-            for item in items:
-                name_tag = item.select_one('.pnt') or item.select_one('.pro_nm')
-                price_tag = item.select_one('.prc') or item.select_one('.price')
-                
-                if name_tag and price_tag:
-                    brand = name_tag.get_text(strip=True)
-                    price_str = price_tag.get_text(strip=True)
-                    
-                    if any(x in brand.upper() for x in ["STEEL", "TMT", "AGNI", "ARS", "KAAVERI"]):
-                        # Extracting digits only
-                        clean_p = "".join(filter(str.isdigit, price_str))
+            # Full page text search for the price pattern
+            page_content = soup.get_text()
+            
+            # ARS site-la "Rs.70,000/MT" oru specific format-la irukkum
+            if "Rs." in page_content and "/MT" in page_content:
+                # Splitting the text to isolate the price number
+                parts = page_content.split("Rs.")
+                for part in parts[1:]:
+                    if "/MT" in part:
+                        price_val = part.split("/MT")[0].strip()
+                        # Removing commas: "70,000" -> "70000"
+                        clean_p = "".join(filter(str.isdigit, price_val))
                         
                         if clean_p and len(clean_p) >= 4:
-                            ton_p = float(clean_p)
-                            per_kg = ton_p / 1000
-                            kg_data.append(f"🏗️ *{brand}*\n💰 *₹{per_kg:.2f} / KG* _(₹{ton_p:,.0f}/Ton)_")
-        return kg_data[:10]
+                            ton_price = float(clean_p)
+                            # CALCULATION: Price per KG
+                            per_kg = ton_price / 1000
+                            
+                            kg_results.append(f"🏗️ *ARS 550D TMT STEEL*\n💰 *₹{per_kg:.2f} / KG*\n_(Official Rate: ₹{ton_price:,.0f}/MT)_")
+                            break # First valid price-ah eduthutta pothum
+        return kg_results
     except Exception as e:
-        print(f"Error: {e}")
+        print(f"ARS Scraper Error: {e}")
         return []
 
-# Indha function name thaan app.py-la import aagum
 def run_materials_broadcast():
+    # Sending status message
     requests.get(f"https://api.telegram.org/bot{TOKEN}/sendMessage", 
-                 params={"chat_id": CHAT_ID, "text": "📍 *Scanning Trichy Market (IndiaMART)...*\n_Calculating Per KG Price..._", "parse_mode": "Markdown"})
+                 params={"chat_id": CHAT_ID, "text": "🏗️ *Fetching Today's ARS Steel Price (Per KG)...*", "parse_mode": "Markdown"})
     
-    data = get_indiamart_trichy_per_kg()
+    data = get_ars_per_kg()
     
+    # IST Time Formatting
     ist_now = datetime.now(timezone.utc) + timedelta(hours=5, minutes=30)
     time_str = ist_now.strftime("%d-%m-%Y | %I:%M %p")
     
-    header = "🧱 *TRICHY STEEL PRICE (PER KG)* 🧱\n"
+    header = "🧱 *OFFICIAL ARS PRICE REPORT* 🧱\n"
     meta = f"🕒 {time_str}\n━━━━━━━━━━━━━━━━━━━━\n"
     
     if not data:
-        body = "⚠️ *Status:* No data found. Check API credits or Site structure."
+        body = "⚠️ *Status:* Official site price not detected.\n_Reason: Site structure change or Maintenance._"
     else:
         body = "\n\n".join(data)
             
-    footer = "\n━━━━━━━━━━━━━━━━━━━━\n📊 Data: IndiaMART Trichy\n_Prices approx. Excl. GST_"
+    footer = "\n━━━━━━━━━━━━━━━━━━━━\n📊 Source: ARS Group Official\n_Unit: Price per KG (Retail)_"
+    
     final_msg = header + meta + body + footer
     
+    # Final Send to Telegram
     requests.get(f"https://api.telegram.org/bot{TOKEN}/sendMessage", 
                  params={"chat_id": CHAT_ID, "text": final_msg, "parse_mode": "Markdown", "disable_web_page_preview": True})
+
+if __name__ == "__main__":
+    run_materials_broadcast()

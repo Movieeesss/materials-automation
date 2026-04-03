@@ -1,17 +1,19 @@
-from flask import Flask, request
+from flask import Flask
 import threading
-from materials import run_materials_broadcast # Import the new function
+from materials import run_materials_broadcast
 
 app = Flask(__name__)
 
-@app.route('/run-materials', methods=['GET'])
+@app.route('/')
+def home():
+    return "Material Bot is Running!"
+
+@app.route('/run-materials')
 def trigger_materials():
-    # Run in background to avoid Render timeout
+    # Important: Run in background to prevent Render 30s timeout
     thread = threading.Thread(target=run_materials_broadcast)
     thread.start()
-    return "OK", 200 # Instant response to Cron-job
-
-# ... (Unga existing /webhook and /run-movies routes) ...
+    return "Scraper Started Successfully", 200
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=5000)

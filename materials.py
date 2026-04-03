@@ -9,7 +9,7 @@ API_KEY = "5a50f090-2bd7-442f-b0c6-3888ee7620c5"
 
 def get_material_prices_v2():
     # More reliable source for Steel & Cement
-    target_url = "https://constructionestimatorindia.com/construction-material-prices/"
+    target_url = "https://buildiyo.store/pages/today-steel-price/"
     # Normal proxy + Render (Saves credits and highly effective)
     proxy_url = f"https://api.webscraping.ai/html?api_key={API_KEY}&url={target_url}&render=true&wait=5000"
     
